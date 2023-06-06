@@ -59,35 +59,39 @@ def survival_stats(data, outcomes, key, filters = []):
     """
     
     # Check that the key exists
-    if key not in data.columns.values :
-        print("'{}' is not a feature of the Titanic data. Did you spell something wrong?".format(key))
+    if key not in data.columns.values:
+        print(
+            f"'{key}' is not a feature of the Titanic data. Did you spell something wrong?"
+        )
         return False
 
     # Return the function before visualizing if 'Cabin' or 'Ticket'
     # is selected: too many unique categories to display
-    if(key == 'Cabin' or key == 'PassengerId' or key == 'Ticket'):
-        print("'{}' has too many unique categories to display! Try a different feature.".format(key))
+    if key in ['Cabin', 'PassengerId', 'Ticket']:
+        print(
+            f"'{key}' has too many unique categories to display! Try a different feature."
+        )
         return False
 
     # Merge data and outcomes into single dataframe
     all_data = pd.concat([data, outcomes.to_frame()], axis = 1)
-    
+
     # Apply filters to data
     for condition in filters:
         all_data = filter_data(all_data, condition)
 
     # Create outcomes DataFrame
     all_data = all_data[[key, 'Survived']]
-    
+
     # Create plotting figure
     plt.figure(figsize=(8,6))
 
     # 'Numerical' features
-    if(key == 'Age' or key == 'Fare'):
-        
+    if key in ['Age', 'Fare']:
+
         # Remove NaN values from Age data
         all_data = all_data[~np.isnan(all_data[key])]
-        
+
         # Divide the range of data into bins and count survival rates
         min_value = all_data[key].min()
         max_value = all_data[key].max()
@@ -98,7 +102,7 @@ def survival_stats(data, outcomes, key, filters = []):
             bins = np.arange(0, all_data['Fare'].max() + 20, 20)
         if(key == 'Age'):
             bins = np.arange(0, all_data['Age'].max() + 10, 10)
-        
+
         # Overlay each bin's survival rates
         nonsurv_vals = all_data[all_data['Survived'] == 0][key].reset_index(drop = True)
         surv_vals = all_data[all_data['Survived'] == 1][key].reset_index(drop = True)
@@ -106,18 +110,17 @@ def survival_stats(data, outcomes, key, filters = []):
                  color = 'red', label = 'Did not survive')
         plt.hist(surv_vals, bins = bins, alpha = 0.6,
                  color = 'green', label = 'Survived')
-    
+
         # Add legend to plot
         plt.xlim(0, bins.max())
         plt.legend(framealpha = 0.8)
-    
-    # 'Categorical' features
+
     else:
        
         # Set the various categories
         if(key == 'Pclass'):
             values = np.arange(1,4)
-        if(key == 'Parch' or key == 'SibSp'):
+        if key in ['Parch', 'SibSp']:
             values = np.arange(0,np.max(data[key]) + 1)
         if(key == 'Embarked'):
             values = ['C', 'Q', 'S']
@@ -151,6 +154,7 @@ def survival_stats(data, outcomes, key, filters = []):
     # Report number of passengers with missing values
     if sum(pd.isnull(all_data[key])):
         nan_outcomes = all_data[pd.isnull(all_data[key])]['Survived']
-        print("Passengers with missing '{}' values: {} ({} survived, {} did not survive)".format( \
-              key, len(nan_outcomes), sum(nan_outcomes == 1), sum(nan_outcomes == 0)))
+        print(
+            f"Passengers with missing '{key}' values: {len(nan_outcomes)} ({sum(nan_outcomes == 1)} survived, {sum(nan_outcomes == 0)} did not survive)"
+        )
 

@@ -15,7 +15,7 @@ def load_cfar10_batch(cifar10_dataset_folder_path, batch_id):
     """
     Load a batch of the dataset
     """
-    with open(cifar10_dataset_folder_path + '/data_batch_' + str(batch_id), mode='rb') as file:
+    with open(f'{cifar10_dataset_folder_path}/data_batch_{str(batch_id)}', mode='rb') as file:
         batch = pickle.load(file, encoding='latin1')
 
     features = batch['data'].reshape((len(batch['data']), 3, 32, 32)).transpose(0, 2, 3, 1)
@@ -31,28 +31,32 @@ def display_stats(cifar10_dataset_folder_path, batch_id, sample_id):
     batch_ids = list(range(1, 6))
 
     if batch_id not in batch_ids:
-        print('Batch Id out of Range. Possible Batch Ids: {}'.format(batch_ids))
+        print(f'Batch Id out of Range. Possible Batch Ids: {batch_ids}')
         return None
 
     features, labels = load_cfar10_batch(cifar10_dataset_folder_path, batch_id)
 
     if not (0 <= sample_id < len(features)):
-        print('{} samples in batch {}.  {} is out of range.'.format(len(features), batch_id, sample_id))
+        print(
+            f'{len(features)} samples in batch {batch_id}.  {sample_id} is out of range.'
+        )
         return None
 
-    print('\nStats of batch {}:'.format(batch_id))
-    print('Samples: {}'.format(len(features)))
+    print(f'\nStats of batch {batch_id}:')
+    print(f'Samples: {len(features)}')
     print('Label Counts: {}'.format(dict(zip(*np.unique(labels, return_counts=True)))))
-    print('First 20 Labels: {}'.format(labels[:20]))
+    print(f'First 20 Labels: {labels[:20]}')
 
     sample_image = features[sample_id]
     sample_label = labels[sample_id]
     label_names = _load_label_names()
 
-    print('\nExample of Image {}:'.format(sample_id))
-    print('Image - Min Value: {} Max Value: {}'.format(sample_image.min(), sample_image.max()))
-    print('Image - Shape: {}'.format(sample_image.shape))
-    print('Label - Label Id: {} Name: {}'.format(sample_label, label_names[sample_label]))
+    print(f'\nExample of Image {sample_id}:')
+    print(
+        f'Image - Min Value: {sample_image.min()} Max Value: {sample_image.max()}'
+    )
+    print(f'Image - Shape: {sample_image.shape}')
+    print(f'Label - Label Id: {sample_label} Name: {label_names[sample_label]}')
     plt.axis('off')
     plt.imshow(sample_image)
 
@@ -85,7 +89,8 @@ def preprocess_and_save_data(cifar10_dataset_folder_path, normalize, one_hot_enc
             one_hot_encode,
             features[:-validation_count],
             labels[:-validation_count],
-            'preprocess_batch_' + str(batch_i) + '.p')
+            f'preprocess_batch_{str(batch_i)}.p',
+        )
 
         # Use a portion of training batch for validation
         valid_features.extend(features[-validation_count:])
@@ -99,7 +104,7 @@ def preprocess_and_save_data(cifar10_dataset_folder_path, normalize, one_hot_enc
         np.array(valid_labels),
         'preprocess_validation.p')
 
-    with open(cifar10_dataset_folder_path + '/test_batch', mode='rb') as file:
+    with open(f'{cifar10_dataset_folder_path}/test_batch', mode='rb') as file:
         batch = pickle.load(file, encoding='latin1')
 
     # load the training data
@@ -128,7 +133,7 @@ def load_preprocess_training_batch(batch_id, batch_size):
     """
     Load the Preprocessed Training data and return them in batches of <batch_size> or less
     """
-    filename = 'preprocess_batch_' + str(batch_id) + '.p'
+    filename = f'preprocess_batch_{str(batch_id)}.p'
     features, labels = pickle.load(open(filename, mode='rb'))
 
     # Return the training data in batches of size <batch_size> or less

@@ -23,21 +23,17 @@ def calculate_safety(data):
 	good_ratio = data['good_actions'].sum() * 1.0 / \
 	(data['initial_deadline'] - data['final_deadline']).sum()
 
-	if good_ratio == 1: # Perfect driving
+	if good_ratio == 1:
 		return ("A+", "green")
-	else: # Imperfect driving
-		if data['actions'].apply(lambda x: ast.literal_eval(x)[4]).sum() > 0: # Major accident
-			return ("F", "red")
-		elif data['actions'].apply(lambda x: ast.literal_eval(x)[3]).sum() > 0: # Minor accident
-			return ("D", "#EEC700")
-		elif data['actions'].apply(lambda x: ast.literal_eval(x)[2]).sum() > 0: # Major violation
-			return ("C", "#EEC700")
-		else: # Minor violation
-			minor = data['actions'].apply(lambda x: ast.literal_eval(x)[1]).sum()
-			if minor >= len(data)/2: # Minor violation in at least half of the trials
-				return ("B", "green")
-			else:
-				return ("A", "green")
+	if data['actions'].apply(lambda x: ast.literal_eval(x)[4]).sum() > 0: # Major accident
+		return ("F", "red")
+	elif data['actions'].apply(lambda x: ast.literal_eval(x)[3]).sum() > 0: # Minor accident
+		return ("D", "#EEC700")
+	elif data['actions'].apply(lambda x: ast.literal_eval(x)[2]).sum() > 0: # Major violation
+		return ("C", "#EEC700")
+	else: # Minor violation
+		minor = data['actions'].apply(lambda x: ast.literal_eval(x)[1]).sum()
+		return ("B", "green") if minor >= len(data)/2 else ("A", "green")
 
 
 def calculate_reliability(data):
@@ -45,19 +41,18 @@ def calculate_reliability(data):
 
 	success_ratio = data['success'].sum() * 1.0 / len(data)
 
-	if success_ratio == 1: # Always meets deadline
+	if success_ratio == 1:
 		return ("A+", "green")
+	if success_ratio >= 0.90:
+		return ("A", "green")
+	elif success_ratio >= 0.80:
+		return ("B", "green")
+	elif success_ratio >= 0.70:
+		return ("C", "#EEC700")
+	elif success_ratio >= 0.60:
+		return ("D", "#EEC700")
 	else:
-		if success_ratio >= 0.90:
-			return ("A", "green")
-		elif success_ratio >= 0.80:
-			return ("B", "green")
-		elif success_ratio >= 0.70:
-			return ("C", "#EEC700")
-		elif success_ratio >= 0.60:
-			return ("D", "#EEC700")
-		else:
-			return ("F", "red")
+		return ("F", "red")
 
 
 def plot_trials(csv):

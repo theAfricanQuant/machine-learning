@@ -55,7 +55,7 @@ def ModelLearning(X, y):
             test_mean + test_std, alpha = 0.15, color = 'g')
 
         # Labels
-        ax.set_title('max_depth = %s'%(depth))
+        ax.set_title(f'max_depth = {depth}')
         ax.set_xlabel('Number of Training Points')
         ax.set_ylabel('Score')
         ax.set_xlim([0, X.shape[0]*0.8])
